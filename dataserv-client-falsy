@@ -1,0 +1,86 @@
+#!/usr/bin/python3
+
+# Import modules.
+import sys
+import os
+import time
+import requests
+from btctxstore import BtcTxStore
+from dataserv_client import control
+from dataserv_client import messaging
+
+# Import local modules.
+import config
+
+def get_size_from_height(height):
+    byte = config.SHARD_SIZE * max_height
+    if byte < 1024:
+        return ("%dbytes" % (byte))
+    if byte < 1024**2:
+        return ("%.2fKiB" % (byte/1024))
+    if byte < 1024**3:
+        return ("%.2fMiB" % (byte/1024**2))
+    if byte < 1024**4:
+        return ("%.2fGiB" % (byte/1024**3))
+    else:
+        return ("%.2fTiB" % (byte/1024**4))
+
+# Read command line arguments.
+if len(sys.argv) <= 1:
+    print("usage: ./dataserv-client-falsy MAX_HEIGHT [CURRENT_HEIGHT]")
+    sys.exit(1)
+
+max_height = int(sys.argv[1])
+current_height = -1
+if len(sys.argv) >= 3:
+    current_height = int(sys.argv[2])
+
+print("I: configuration: MAX_HEIGHT=%d (%s)" % (max_height, get_size_from_height(max_height)))
+
+#
+# Prepare.
+btctxstore = BtcTxStore()
+cfg = control.config.get(btctxstore, os.path.realpath(config.DEFAULT_CONFIG_PATH))
+messenger = messaging.Messaging(
+    config.DEFAULT_URL,
+    btctxstore.get_key(cfg["wallet"]),
+    config.DEFAULT_CONNECTION_RETRY_LIMIT,
+    config.DEFAULT_CONNECTION_RETRY_DELAY)
+
+#
+# Get current height.
+if current_height == -1:
+    print("I: querying for current height of payout address \"%s\"" % (cfg["payout_address"]))
+    res = requests.get(config.DEFAULT_URL+'/api/online/json')
+    if res.status_code != 200:
+        print("E: failed to fetch JSON data! (status code = %d)" % (res.status_code))
+        sys.exit(1)
+    json = res.json()
+    # Search my address.
+    my_height = -1
+    for i in range(len(json["farmers"])):
+        if json["farmers"][i]["payout_addr"] == cfg["payout_address"]:
+            my_height = int(json["farmers"][i]["height"])
+    if my_height == -1:
+        print("E: your payout address not found! specify current height by command line!")
+        sys.exit(1)
+    print("I: current height for \"%s\" is %d" % (cfg["payout_address"], my_height))
+else:
+    my_height = current_height
+
+#
+# Simulate the Shard generation.
+if my_height < max_height - 1:
+    for height in range(my_height, max_height):
+        print("I: simulated generation of Shard at height = %d" % (height))
+        if (height == my_height) or (height == max_height-1) or (height%config.DEFAULT_SET_HEIGHT_INTERVAL == 0):
+            print("I: announcing self height...")
+            messenger.height(height)
+        time.sleep(config.SHARD_GENERATE_INTERVAL)
+
+#
+# Ping.
+while True:
+    messenger.ping()
+    time.sleep(config.DEFAULT_DELAY)
+

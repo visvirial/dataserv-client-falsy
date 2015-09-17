@@ -1,0 +1,19 @@
+
+from dataserv_client import common
+
+# dataserv-client-falsy options.
+SHARD_GENERATE_INTERVAL = 1
+
+# Extending constants defined in dataserv-client.
+DEFAULT_URL = "http://switch.driveshare.org"
+DEFAULT_DELAY = common.DEFAULT_DELAY
+
+DEFAULT_APP_HOME = common.DEFAULT_APP_HOME
+DEFAULT_CONFIG_PATH = common.DEFAULT_CONFIG_PATH
+
+DEFAULT_SET_HEIGHT_INTERVAL = common.DEFAULT_SET_HEIGHT_INTERVAL
+SHARD_SIZE = 1024 * 1024 * 128
+
+DEFAULT_CONNECTION_RETRY_LIMIT = common.DEFAULT_CONNECTION_RETRY_LIMIT
+DEFAULT_CONNECTION_RETRY_DELAY = common.DEFAULT_CONNECTION_RETRY_DELAY
+
