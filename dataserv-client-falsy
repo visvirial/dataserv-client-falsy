@@ -13,7 +13,7 @@ from dataserv_client import messaging
 import config
 
 def get_size_from_height(height):
-    byte = config.SHARD_SIZE * max_height
+    byte = config.SHARD_SIZE * height
     if byte < 1024:
         return ("%dbytes" % (byte))
     if byte < 1024**2:
