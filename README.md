@@ -10,6 +10,8 @@ This simple tool emulates the communication of Storj's `dataserv-client` to anno
 
 You can announce an arbitrary Shard height without consuming any disk spaces.
 
+This tool is tested on `dataserv-client v2.1.3`.
+
 
 
 Install
