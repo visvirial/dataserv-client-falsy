@@ -72,7 +72,7 @@ else:
 # Simulate the Shard generation.
 if my_height < max_height - 1:
     for height in range(my_height, max_height):
-        print("I: simulated generation of Shard at height = %d" % (height))
+        print("I: simulated generation of Shard at height = %d (%s)" % (height, get_size_from_height(height)))
         if (height == my_height) or (height == max_height-1) or (height%config.DEFAULT_SET_HEIGHT_INTERVAL == 0):
             print("I: announcing self height...")
             messenger.height(height)
